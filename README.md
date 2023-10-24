@@ -1,2 +1,2 @@
 # GameOfLife
-ye
+Overly complex eating simulation
