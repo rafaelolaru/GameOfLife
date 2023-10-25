@@ -1,6 +1,6 @@
 Project Specifications
 Detailed Problem Description
-The "Beehive Life" simulation project aims to create a dynamic representation of life within a beehive, akin to Conway's Game of Life, but with more complex rules and entity behaviors. The simulation begins with approximately 500 bees, categorized into different roles: Worker Bees, a Queen Bee, Male Bees (Drones), and Baby Bees (Larvae). Each category of bees has distinct behaviors and contributes differently to the hive's functionality and growth.
+The "Beehive Life" simulation project aims to create a dynamic representation of life within a beehive, but with more complex rules and entity behaviors. The simulation begins with approximately 500 bees, categorized into different roles: Worker Bees, a Queen Bee, Male Bees (Drones), and Baby Bees (Larvae). Each category of bees has distinct behaviors and contributes differently to the hive's functionality and growth.
 
 Worker Bees are primarily responsible for collecting food. Each day, a Worker Bee has a 75% chance of successfully gathering a unit of food. The hive needs these food units to sustain and grow. Specifically, every five units of food collected allows a new Baby Bee to be born. The Queen Bee, while she may have various functionalities in a real hive, will primarily be responsible for the birth of new bees in our simulation. Male Bees have the potential for different roles, but in the context of this simulation, they will primarily serve to ensure the hive's growth through mating with the queen.
 
