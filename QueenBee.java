@@ -22,9 +22,9 @@ class QueenBee extends Bee {
 
     private void createBabyBee() {
         // Randomly decide the type of the baby bee
-        Bee babyBee = Math.random() < 0.01 ?
+        Bee babyBee = Math.random() < 0.10 ?
                 new QueenBee(environment, lifecycleListener) :
-                (Math.random() < 0.5 ? new WorkerBee(environment, lifecycleListener) : new MaleBee(environment, lifecycleListener));
+                (Math.random() < 0.8 ? new WorkerBee(environment, lifecycleListener) : new MaleBee(environment, lifecycleListener));
         lifecycleListener.onBeeBirth(babyBee);
     }
 }
