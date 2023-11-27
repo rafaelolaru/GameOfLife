@@ -1,64 +1,66 @@
-import java.util.Random;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 class HiveEnvironment {
-    private BlockingQueue<String> foodQueue = new LinkedBlockingQueue<>();
-    private ConcurrentLinkedQueue<MaleBee> matingQueue = new ConcurrentLinkedQueue<>();
-    private AtomicInteger foodCollected = new AtomicInteger(0);
-    private Random random = new Random();
+    private AtomicInteger foodCollected = new AtomicInteger(0);// amount of food in the hive
+    private AtomicInteger currentDay = new AtomicInteger(0);// does this really need an explanation?
+    public AtomicInteger totalBees = new AtomicInteger(0); //total number of bees
+    private AtomicInteger numberOfDrones = new AtomicInteger(0);
+    private AtomicInteger numberOfWorkerBees = new AtomicInteger(0);
+    private AtomicInteger wildFood = new AtomicInteger(0);// amount of food available for grabs in the wild
 
-    private AtomicInteger foodAvailable = new AtomicInteger(0);
-
-    private final int dailyFoodLimit = 500; // For example, 20 units of food per day
-    private AtomicInteger foodAddedToday = new AtomicInteger(0);
-
-    public boolean tryAddFood() {
-        if (foodAddedToday.get() < dailyFoodLimit) {
-            addFood();
-            foodAddedToday.incrementAndGet();
-            return true;
-        }
-        return false;
+    public AtomicInteger getWildFood() {
+        return wildFood;
     }
 
-    public void resetDailyFood() {
-        foodAddedToday.set(0);
-    }
-    public void addFood() {
-        foodQueue.offer("Food");
-        foodCollected.incrementAndGet();
+    public AtomicInteger getNumberOfDrones() {
+        return numberOfDrones;
     }
 
-    public boolean consumeFood() {
-        int currentFood;
-        do {
-            currentFood = foodAvailable.get();
-            if (currentFood == 0) {
-                return false; // No food available to consume
-            }
-        } while (!foodAvailable.compareAndSet(currentFood, currentFood - 1));
-        return true;
+    public AtomicInteger getNumberOfWorkerBees() {
+        return numberOfWorkerBees;
     }
 
+    public void addWildFood(int amount) {
+        wildFood.addAndGet(amount);
+    }
+    public void incrementDrones() {
+        numberOfDrones.incrementAndGet();
+    }
+    public void decrementDrones() {
+        numberOfDrones.decrementAndGet();
+    }
+    public void incrementWorkerBees() {
+        numberOfWorkerBees.incrementAndGet();
+    }
+    public void decrementWorkerBees() {
+        numberOfWorkerBees.decrementAndGet();
+    }
+    public boolean hasSufficientWildFood() {
+        return wildFood.get() > 10;
+    }
+    public void setWildFood(int amount) {
+        wildFood.set(amount);
+    }
+    public int getCurrentDay() {
+        return currentDay.get();
+    }
+    public void nextDay() {
+        currentDay.incrementAndGet();
+    }
+    public int getTotalNumberOfBees() {
+        return totalBees.get();
+    }
     public int getFoodCollected() {
         return foodCollected.get();
     }
-
-    public String getFood() {
-        return foodQueue.poll();
+    public void addFood() {
+        //Upon succesful "harvesting", the bee brings home 10 units of food
+        foodCollected.addAndGet(10);
+        wildFood.addAndGet(-10);
     }
-
-    public void addDrone(MaleBee drone) {
-        matingQueue.offer(drone);
-    }
-
-    public MaleBee getDrone() {
-        return matingQueue.poll();
-    }
-
-    public boolean tryMating() {
-        return random.nextDouble() < 0.95; // 5% chance of successful mating
+    public void eatFood() {
+        /* one bee can only eat a unit of food per day. */
+        if (foodCollected.get() > 0) {
+            foodCollected.decrementAndGet(); // Consume one unit of food
+        }
     }
 }

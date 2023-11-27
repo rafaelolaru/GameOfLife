@@ -1,30 +1,33 @@
-class QueenBee extends Bee {
-    private int matingCooldown;
+import java.util.Random;
 
-    public QueenBee(HiveEnvironment environment, BeeLifecycleListener listener) {
+class QueenBee extends Bee {
+    private Random random = new Random();
+
+    public QueenBee(HiveEnvironment environment, LifeCycleListener listener) {
         super(200, environment, listener, "QueenBee"); // increased lifespan to 200
-        this.matingCooldown = 0;
     }
 
     @Override
     public void performDailyTask() {
-        if (matingCooldown <= 0) {
-            MaleBee drone = environment.getDrone();
-            if (drone != null && drone.isAlive() && environment.tryMating()) {
-                System.out.println("Queen bee has mated with a drone.");
-                matingCooldown = 2; // reset mating cooldown to 2 days
-                createBabyBee(); // Use the intended method to create a baby bee
-            }
-        } else {
-            matingCooldown--;
-        }
-    }
+        int totalBees = environment.getTotalNumberOfBees();
+        int foodAvailable = environment.getFoodCollected();
+        double baseRate = totalBees * 0.1;//the hive can get roughly 10% bigger each day.
+        double threshold = totalBees * 0.1 * 2;//if there is not enough food, no bees will be born
+        double foodPerBee = 1;//this may need to be changed to 1
+        double randomVariabilityFactor = 0.8 + (1.2 - 0.8) * random.nextDouble();//some kind of randomness
+        //this randomness multiplies the final amount of bees to a number between 0.8 and 1.2
+        double dailyBirthRate = baseRate * ((foodAvailable - threshold) / foodPerBee) * randomVariabilityFactor;
+        // ensure birth rate is not negative
+        int newBees = Math.max(0, (int) Math.round(dailyBirthRate));
 
-    private void createBabyBee() {
-        // Randomly decide the type of the baby bee
-        Bee babyBee = Math.random() < 0.10 ?
-                new QueenBee(environment, lifecycleListener) :
-                (Math.random() < 0.8 ? new WorkerBee(environment, lifecycleListener) : new MaleBee(environment, lifecycleListener));
-        lifecycleListener.onBeeBirth(babyBee);
+        for (int i = 0; i < newBees; i++) {
+            Bee newBee;
+            if (Math.random() < 0.85) {
+                newBee = new WorkerBee(environment, lifecycleListener);
+            } else {
+                newBee = new MaleBee(environment, lifecycleListener);
+            }
+            lifecycleListener.onBirth(newBee);
+        }
     }
 }
