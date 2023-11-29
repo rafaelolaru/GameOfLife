@@ -26,6 +26,10 @@ public class HiveSimulation implements LifeCycleListener {
             Bee maleBee = new MaleBee(environment, this);
             this.onBirth(maleBee); // Trigger onBirth for each male bee
         }
+        for (int i = 0; i < 4; i++) {
+            Bacteria bacteria = new Bacteria(environment, this);
+            this.onBirth(bacteria); // Trigger onBirth for each male bee
+        }
 
         for (int i = 0; i < 20; i++) {
             environment.addFood();
@@ -34,7 +38,7 @@ public class HiveSimulation implements LifeCycleListener {
         // Run the simulation for the specified number of days
         for (int day = 0; day < simulationDays; day++) {
             // First we set wild food to 10000 at the start of each day
-            environment.setWildFood(10000);
+            environment.setWildFood(1000000);
             // Then we need to let the bees know that there is a new day.
             environment.nextDay();
             // Simulate the end of a day
@@ -45,6 +49,7 @@ public class HiveSimulation implements LifeCycleListener {
                 break;
             }
             System.out.println("End of Day " + (day + 1) + ":");
+            System.out.println("Total number of bacterias: " + environment.getTotalNumberOfBacterias());
             System.out.println("Total number of bees: " + environment.getTotalNumberOfBees());
             System.out.println("Number of worker bees: " + environment.getNumberOfWorkerBees());
             System.out.println("Number of drones: " + environment.getNumberOfDrones());
@@ -77,28 +82,53 @@ public class HiveSimulation implements LifeCycleListener {
     @Override
     public void onDeath(LivingThing livingThing) {
         Bee bee = (Bee) livingThing;
-        if (bee instanceof WorkerBee) {
-            environment.decrementWorkerBees();
-        } else if (bee instanceof MaleBee) {
-            environment.decrementDrones();
+        Bacteria bacteria = (Bacteria) livingThing;
+        if(bacteria.type.equals("Bacteria")){
+            environment.totalBacterias.decrementAndGet();
+            environment.addWildFood(5); // Add 5 units to the wild food
         }
-        environment.totalBees.decrementAndGet();
-        environment.addWildFood(20);  // Add 20 units to the wild food
+        else{
+            if (bee instanceof WorkerBee) {
+                environment.decrementWorkerBees();
+            } else if (bee instanceof MaleBee) {
+                environment.decrementDrones();
+            }
+            environment.totalBees.decrementAndGet();
+            environment.addWildFood(20);  // Add 20 units to the wild food
+        }
     }
 
     @Override
     public void onBirth(LivingThing livingThing) {
-        Bee bee = (Bee) livingThing;
-        if (bee instanceof WorkerBee) {
-            environment.incrementWorkerBees();
-        } else if (bee instanceof MaleBee) {
-            environment.incrementDrones();
+        Bee bee = new WorkerBee(environment, this);
+        bee.isAlive = false;
+        Bacteria bacteria = new Bacteria(environment, this);
+        bacteria.isAlive = false;
+        try{
+        bee = (Bee) livingThing;
+        }catch(Exception e){
+        bacteria = (Bacteria) livingThing;
         }
-        environment.totalBees.incrementAndGet();
-        try {
-            executorService.submit(bee);
-        } catch (RejectedExecutionException e) {
-            System.out.println("Could not start the life of a new " + bee.type + " because the executor service is shutting down.");
+        if(bacteria.isAlive){
+            environment.incrementBacterias();
+            try {
+                executorService.submit(bacteria);
+            } catch (RejectedExecutionException e) {
+                System.out.println("Could not start the life of a new " + bacteria.type + " because the executor service is shutting down.");
+            }
+        }
+        else{
+            if (bee instanceof WorkerBee) {
+                environment.incrementWorkerBees();
+            } else if (bee instanceof MaleBee) {
+                environment.incrementDrones();
+            }
+            environment.totalBees.incrementAndGet();
+            try {
+                executorService.submit(bee);
+            } catch (RejectedExecutionException e) {
+                System.out.println("Could not start the life of a new " + bee.type + " because the executor service is shutting down.");
+            }
         }
     }
 }

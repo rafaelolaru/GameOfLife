@@ -3,6 +3,7 @@ class HiveEnvironment {
     private AtomicInteger foodCollected = new AtomicInteger(0);// amount of food in the hive
     private AtomicInteger currentDay = new AtomicInteger(0);// does this really need an explanation?
     public AtomicInteger totalBees = new AtomicInteger(0); //total number of bees
+    public AtomicInteger totalBacterias = new AtomicInteger(0); //total number of bacterias
     private AtomicInteger numberOfDrones = new AtomicInteger(0);
     private AtomicInteger numberOfWorkerBees = new AtomicInteger(0);
     private AtomicInteger wildFood = new AtomicInteger(0);// amount of food available for grabs in the wild
@@ -21,6 +22,12 @@ class HiveEnvironment {
 
     public void addWildFood(int amount) {
         wildFood.addAndGet(amount);
+    }
+    public void incrementBacterias() {
+        totalBacterias.incrementAndGet();
+    }
+    public void decrementBacterias() {
+        totalBacterias.decrementAndGet();
     }
     public void incrementDrones() {
         numberOfDrones.incrementAndGet();
@@ -49,6 +56,9 @@ class HiveEnvironment {
     public int getTotalNumberOfBees() {
         return totalBees.get();
     }
+    public int getTotalNumberOfBacterias() {
+        return totalBacterias.get();
+    }
     public int getFoodCollected() {
         return foodCollected.get();
     }
@@ -62,5 +72,8 @@ class HiveEnvironment {
         if (foodCollected.get() > 0) {
             foodCollected.decrementAndGet(); // Consume one unit of food
         }
+    }
+    public void resetDailyFood(){ //handles endOfDay foodCounter reset
+        ;
     }
 }
