@@ -21,8 +21,8 @@ public class Bacteria extends LivingThing{
         this.lifecycleListener = listener;
         this.isAlive = true;
         this.type = type;
-        this.id = Bacteria.ID;
-        Bacteria.ID = Bacteria.ID + 1;
+        this.id = LivingThing.ID;
+        LivingThing.ID = LivingThing.ID + 1;
 
         this.lifecycleListener.onBirth(this);
         this.consecutiveDaysEaten = 0;
@@ -55,8 +55,7 @@ public class Bacteria extends LivingThing{
             // Check if the bacteria has eaten for three consecutive days
             if (consecutiveDaysEaten >= 3) {
                 // Double the bacteria
-                Bacteria newBacteria = new Bacteria(environment, lifecycleListener);
-                lifecycleListener.onBirth(newBacteria);
+                new Bacteria(environment, lifecycleListener);
                 consecutiveDaysEaten = 0; // Reset consecutive days of eating
             }
 
@@ -78,22 +77,7 @@ public class Bacteria extends LivingThing{
         age.incrementAndGet();
     }
     public void performDailyTask() {
-        int totalBacteria = environment.getTotalNumberOfBacterias();
-        int foodAvailable = environment.getFoodCollected();
-        double baseRate = totalBacteria * 0.01;//the bacteria population can get roughly 1% bigger each day.
-        double threshold = totalBacteria * 0.1 * 2;//if there is not enough food, no bacteria will be born
-        double foodPerBacteria = 5;//this may need to be changed to 1
-        double randomVariabilityFactor = 0.2 + (0.6 - 0.2) * random.nextDouble();//some kind of randomness
-        //this randomness multiplies the final amount of bees to a number between 0.2 and 0.6
-        double dailyBirthRate = baseRate * ((foodAvailable - threshold) / foodPerBacteria) * randomVariabilityFactor;
-        // ensure birth rate is not negative
-        int newBacterias = Math.max(0, (int) Math.round(dailyBirthRate));
-
-        for (int i = 0; i < newBacterias; i++) {
-            Bacteria newBacteria;
-            newBacteria = new Bacteria(environment, lifecycleListener);
-            lifecycleListener.onBirth(newBacteria);
-        }
+        ;//reproduction happens @LiveDay for now
     }
     @Override
     public void run() {
@@ -105,7 +89,7 @@ public class Bacteria extends LivingThing{
             }
 
             try {
-                Thread.sleep(5 + random.nextInt(26)); // this will reduce the cpu usage. Sleep interval: 5-30ms
+                Thread.sleep(400 + random.nextInt(201)); // this will reduce the cpu usage. Sleep interval: 0.4-0.6s
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return;

@@ -159,7 +159,7 @@ public class HiveSimulation implements LifeCycleListener {
     public void tickNewDay(){ //signals the start of a new day for a few ms
         this.newDay.set(true);
         try {
-            TimeUnit.MILLISECONDS.sleep(10);
+            TimeUnit.MILLISECONDS.sleep(100);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

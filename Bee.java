@@ -14,8 +14,8 @@ abstract class Bee extends LivingThing{
         this.lifecycleListener = listener;
         this.isAlive = true;
         this.type = type;
-        this.id = Bee.ID;
-        Bee.ID = Bee.ID + 1;
+        this.id = LivingThing.ID;
+        LivingThing.ID = LivingThing.ID + 1;
 
         this.lifecycleListener.onBirth(this);
     }
@@ -40,7 +40,7 @@ abstract class Bee extends LivingThing{
             }
 
             try {
-                Thread.sleep(5 + random.nextInt(26)); // this will reduce the cpu usage. Sleep interval: 5-30ms
+                Thread.sleep(400 + random.nextInt(201)); // this will reduce the cpu usage. Sleep interval: 0.4-0.6s
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return;
