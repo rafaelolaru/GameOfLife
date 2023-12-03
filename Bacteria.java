@@ -10,6 +10,11 @@ public class Bacteria extends LivingThing{
     protected LifeCycleListener lifecycleListener;
     protected String type;
     protected int id;
+
+    private int consecutiveDaysEaten;
+
+    private int consecutiveDaysStarved;
+
     public Bacteria(int lifespan, HiveEnvironment environment, LifeCycleListener listener, String type) {
         this.lifespan = lifespan;
         this.environment = environment;
@@ -20,25 +25,63 @@ public class Bacteria extends LivingThing{
         Bacteria.ID = Bacteria.ID + 1;
 
         this.lifecycleListener.onBirth(this);
+        this.consecutiveDaysEaten = 0;
+        this.consecutiveDaysStarved = 0;
     }
     public Bacteria(HiveEnvironment environment, LifeCycleListener listener) {
         this(4,environment,listener,"Bacteria");
     }
+    @Override
     public void liveDay() {
+        // Check if the bacteria is alive
+        if (!isAlive) {
+            return;
+        }
+
+        // Check if the bacteria has reached its lifespan
         if (age.incrementAndGet() > lifespan) {
             // die();
             lifecycleListener.onDeath(this);
         }
-        environment.eatFood();
+
+        // Check if the bacteria eats food
+        if (environment.getFoodCollected() > 0) {
+            // Reset consecutive days of starvation if food is consumed
+            consecutiveDaysStarved = 0;
+
+            // Increment consecutive days of eating
+            consecutiveDaysEaten++;
+
+            // Check if the bacteria has eaten for three consecutive days
+            if (consecutiveDaysEaten >= 3) {
+                // Double the bacteria
+                Bacteria newBacteria = new Bacteria(environment, lifecycleListener);
+                lifecycleListener.onBirth(newBacteria);
+                consecutiveDaysEaten = 0; // Reset consecutive days of eating
+            }
+
+            environment.eatFood(); // Consume food
+        } else {
+            // Reset consecutive days of eating
+            consecutiveDaysEaten = 0;
+
+            // Increment consecutive days of starvation
+            consecutiveDaysStarved++;
+
+            // Check if the bacteria has starved for two consecutive days
+            if (consecutiveDaysStarved >= 2) {
+                lifecycleListener.onDeath(this); // Bacteria dies due to starvation
+                return;
+            }
+        }
+        // Increment age as a day passes
+        age.incrementAndGet();
     }
-    // public void die() {
-    //     lifecycleListener.onDeath(this);
-    // }
     public void performDailyTask() {
         int totalBacteria = environment.getTotalNumberOfBacterias();
         int foodAvailable = environment.getFoodCollected();
         double baseRate = totalBacteria * 0.01;//the bacteria population can get roughly 1% bigger each day.
-        double threshold = totalBacteria * 0.1 * 2;//if there is not enough food, no bees will be born
+        double threshold = totalBacteria * 0.1 * 2;//if there is not enough food, no bacteria will be born
         double foodPerBacteria = 5;//this may need to be changed to 1
         double randomVariabilityFactor = 0.2 + (0.6 - 0.2) * random.nextDouble();//some kind of randomness
         //this randomness multiplies the final amount of bees to a number between 0.2 and 0.6
