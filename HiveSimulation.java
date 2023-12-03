@@ -15,7 +15,7 @@ public class HiveSimulation implements LifeCycleListener {
     }
 
     private void startSimulation() {
-        // Starting the simulation with 1 queen, 100 worker bees, 10 drones and 20 units of food in the hive.
+        // Starting the simulation with 1 queen, 100 worker bees, 10 drones, 4 bacterias and 20 units of food in the hive.
         Bee queenBee = new QueenBee(environment, this);
         this.onBirth(queenBee); // Trigger onBirth for the queen bee
         for (int i = 0; i < 100; i++) {
@@ -28,7 +28,7 @@ public class HiveSimulation implements LifeCycleListener {
         }
         for (int i = 0; i < 4; i++) {
             Bacteria bacteria = new Bacteria(environment, this);
-            this.onBirth(bacteria); // Trigger onBirth for each male bee
+            this.onBirth(bacteria); // Trigger onBirth for each bacteria
         }
 
         for (int i = 0; i < 20; i++) {
@@ -41,6 +41,12 @@ public class HiveSimulation implements LifeCycleListener {
             environment.setWildFood(1000000);
             // Then we need to let the bees know that there is a new day.
             environment.nextDay();
+
+            // Run the liveDay method for each bacteria
+            for (int i = 0; i < environment.getTotalNumberOfBacterias(); i++) {
+                Bacteria bacteria = new Bacteria(environment, this);
+                bacteria.liveDay();
+            }
             // Simulate the end of a day
             try {
                 TimeUnit.SECONDS.sleep(1); // Each 'day' is one second long
