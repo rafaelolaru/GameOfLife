@@ -17,12 +17,12 @@ public class BeeHiveSimulation implements BeeLifecycleListener {
 
     private void startSimulation() {
         // Starting the simulation with initial bees
-        executorService.execute(new QueenBee(environment, this));
+        // executorService.execute(new QueenBee(environment, this));
         for (int i = 0; i < 10; i++) {
-            executorService.execute(new WorkerBee(environment, this));
+            // executorService.execute(new WorkerBee(environment, this));
         }
         for (int i = 0; i < 2; i++) {
-            executorService.execute(new MaleBee(environment, this));
+            // executorService.execute(new MaleBee(environment, this));
         }
 
         // Run the simulation for the specified number of days

@@ -50,7 +50,8 @@ class HiveEnvironment {
     public int getCurrentDay() {
         return currentDay.get();
     }
-    public void nextDay() {
+    public void nextDay(HiveSimulation listener) {
+        listener.tickNewDay();
         currentDay.incrementAndGet();
     }
     public int getTotalNumberOfBees() {
