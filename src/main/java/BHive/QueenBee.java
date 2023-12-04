@@ -21,7 +21,7 @@ class QueenBee extends Bee {
         // ensure birth rate is not negative
         int newBees = Math.max(0, (int) Math.round(dailyBirthRate));
 
-        for (int i = 0; i < newBees; i++) {
+        for (int i = 0; i < 1; i++) {
             Bee newBee;
             if (Math.random() < 0.85) {
                 newBee = new WorkerBee(environment, lifecycleListener);

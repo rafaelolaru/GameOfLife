@@ -11,31 +11,25 @@ import java.util.concurrent.TimeoutException;
 public class EventPublisher {
 
     private final Gson gson = new Gson();
-    //private final ConnectionFactory connectionFactory;
+    private final ConnectionFactory connectionFactory;
     private final String exchangeName;
     private Channel channel;
     private Connection connection;
 
-    public EventPublisher(Channel channel, String exchangeName) {
-        this.channel = channel;
+    public EventPublisher(ConnectionFactory factory, String exchangeName) {
+        this.connectionFactory = factory;
         this.exchangeName = exchangeName;
     }
 
-    public <T> void publishEvent(String routingKey, T eventData) {
-        Event<T> event = new Event<>(eventData);
-        String message = gson.toJson(event);
-
+    public void publishEvent(String routingKey, LivingThing livingThing) {
+        //String message = gson.toJson(livingThing);
+        String message =
+        System.out.println(message);
+        System.out.println(livingThing);
         try {
             channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-    private class Event<T> {
-        private final T data;
-
-        public Event(T data) {
-            this.data = data;
         }
     }
 }

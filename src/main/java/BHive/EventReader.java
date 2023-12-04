@@ -38,8 +38,12 @@ public class EventReader {
             String queueName = channel.queueDeclare().getQueue();
             channel.queueBind(queueName, exchangeName, routingKey);
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                String message = new String(delivery.getBody(), "UTF-8");
-                processEvent(message, routingKey);
+                //String message = new String(delivery.getBody(), "UTF-8");
+                //System.out.println("message" + message);
+                System.out.println("i got a message");
+                //JsonObject eventObject = gson.fromJson(message, JsonObject.class);
+                //System.out.println(eventObject);
+                //processEvent(eventObject, routingKey);
             };
 
             channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
@@ -48,9 +52,8 @@ public class EventReader {
         }
     }
 
-    private void processEvent(String jsonEvent, String routingKey) {
+    private void processEvent(JsonObject eventObject, String routingKey) {
         System.out.println("Routing Key: " + routingKey);
-        JsonObject eventObject = gson.fromJson(jsonEvent, JsonObject.class);
         System.out.println("Event Object: " + eventObject);
 
         String type = eventObject.get("type").getAsString();
