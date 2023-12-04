@@ -118,6 +118,7 @@ class QueenBee extends Bee {
             System.out.println("===============================");
         }
         
+        
         // if (!pregnant) {
         //     System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         //     initiateMatingFlight();
