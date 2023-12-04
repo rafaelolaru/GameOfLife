@@ -1,4 +1,6 @@
 class MaleBee extends Bee {
+
+    
     public MaleBee(HiveEnvironment environment, LifeCycleListener listener) {
         super(40, environment, listener, "MaleBee");
     }
