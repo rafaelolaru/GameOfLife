@@ -21,14 +21,10 @@ abstract class Bee extends LivingThing{
     }
     public void liveDay() {
         if (age.incrementAndGet() > lifespan) {
-            // die();
             lifecycleListener.onDeath(this);
         }
         environment.eatFood();
     }
-    // public void die() {
-    //     lifecycleListener.onDeath(this);
-    // }
     public abstract void performDailyTask();
     @Override
     public void run() {

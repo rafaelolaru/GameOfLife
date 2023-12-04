@@ -33,7 +33,7 @@ public class HiveSimulation implements LifeCycleListener {
     }
 
     private void startSimulation() {
-        // Starting the simulation with 1 queen, 100 worker bees, 10 drones, 4 bacterias and 20 units of food in the hive.
+        // Starting the simulation with 1 queen, 100 worker bees, 10 drones, 20 bacterias and 20 units of food in the hive.
         new QueenBee(environment, this); // create queenBee as a task of another thread and trigger onBirth for the queenBee
 
         for (int i = 0; i < 100; i++) {
@@ -42,7 +42,7 @@ public class HiveSimulation implements LifeCycleListener {
         for (int i = 0; i < 10; i++) {
             new MaleBee(environment, this); // create maleBee as a task of another thread and trigger onBirth for the maleBee
         }
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 20; i++) {
             new Bacteria(environment, this); // create bacteria as a task of another thread and trigger onBirth for the bacteria
         }
 

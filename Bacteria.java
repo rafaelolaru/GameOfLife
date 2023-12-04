@@ -2,8 +2,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Random;
 
 public class Bacteria extends LivingThing{
-    private Random random = new Random();
-
     protected AtomicInteger age = new AtomicInteger(0);
     protected final int lifespan;
     protected HiveEnvironment environment;
@@ -29,52 +27,46 @@ public class Bacteria extends LivingThing{
         this.consecutiveDaysStarved = 0;
     }
     public Bacteria(HiveEnvironment environment, LifeCycleListener listener) {
-        this(4,environment,listener,"Bacteria");
+        this(6,environment,listener,"Bacteria");
     }
     @Override
     public void liveDay() {
-        // Check if the bacteria is alive
-        if (!isAlive) {
-            return;
-        }
-
         // Check if the bacteria has reached its lifespan
         if (age.incrementAndGet() > lifespan) {
-            // die();
             lifecycleListener.onDeath(this);
-        }
+        }else{
+            // Check if the bacteria eats food
+            if (environment.getFoodCollected() > 0) {
+                // Reset consecutive days of starvation if food is consumed
+                consecutiveDaysStarved = 0;
 
-        // Check if the bacteria eats food
-        if (environment.getFoodCollected() > 0) {
-            // Reset consecutive days of starvation if food is consumed
-            consecutiveDaysStarved = 0;
+                // Increment consecutive days of eating
+                consecutiveDaysEaten++;
 
-            // Increment consecutive days of eating
-            consecutiveDaysEaten++;
+                // Check if the bacteria has eaten for three consecutive days
+                if (consecutiveDaysEaten >= 3) {
+                    // Double the bacteria
+                    new Bacteria(environment, lifecycleListener);
+                    consecutiveDaysEaten = 0; // Reset consecutive days of eating
+                }
 
-            // Check if the bacteria has eaten for three consecutive days
-            if (consecutiveDaysEaten >= 3) {
-                // Double the bacteria
-                new Bacteria(environment, lifecycleListener);
-                consecutiveDaysEaten = 0; // Reset consecutive days of eating
+                environment.eatFood(); // Consume food
+            } else {
+                // Reset consecutive days of eating
+                consecutiveDaysEaten = 0;
+
+                // Increment consecutive days of starvation
+                consecutiveDaysStarved++;
+
+                // Check if the bacteria has starved for two consecutive days
+                if (consecutiveDaysStarved >= 2) {
+                    lifecycleListener.onDeath(this); // Bacteria dies due to starvation
+                    return;
+                }
             }
-
-            environment.eatFood(); // Consume food
-        } else {
-            // Reset consecutive days of eating
-            consecutiveDaysEaten = 0;
-
-            // Increment consecutive days of starvation
-            consecutiveDaysStarved++;
-
-            // Check if the bacteria has starved for two consecutive days
-            if (consecutiveDaysStarved >= 2) {
-                lifecycleListener.onDeath(this); // Bacteria dies due to starvation
-                return;
-            }
+            // Increment age as a day passes
+            age.incrementAndGet();
         }
-        // Increment age as a day passes
-        age.incrementAndGet();
     }
     public void performDailyTask() {
         ;//reproduction happens @LiveDay for now
