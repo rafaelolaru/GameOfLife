@@ -3,6 +3,10 @@ package BHive;
 class WorkerBee extends Bee {
     private static final double CHANCE_TO_GET_FOOD = 0.75;
 
+    @Override
+    public String getBeeType() {
+        return "Worker";
+    }
     public WorkerBee(HiveEnvironment environment, LifeCycleListener listener) {
         super(30, environment, listener, "WorkerBee"); // increased lifespan to 100
     }

@@ -3,7 +3,10 @@ import java.util.Random;
 
 class QueenBee extends Bee {
     private Random random = new Random();
-
+    @Override
+    public String getBeeType() {
+        return "Queen";
+    }
     public QueenBee(HiveEnvironment environment, LifeCycleListener listener) {
         super(200, environment, listener, "QueenBee"); // increased lifespan to 200
     }

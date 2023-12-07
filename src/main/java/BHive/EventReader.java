@@ -17,13 +17,26 @@ public class EventReader {
     private AtomicInteger totalLivingThings = new AtomicInteger(0);
     private AtomicInteger totalBees = new AtomicInteger(0);
     private AtomicInteger totalBacterias = new AtomicInteger(0);
-    private AtomicInteger foodInHive = new AtomicInteger(0);
-    private AtomicInteger foodInWild = new AtomicInteger(0);
-    private AtomicInteger dronesInMatingQueue = new AtomicInteger(0);
     private AtomicInteger totalQueenBees = new AtomicInteger(0);
     private AtomicInteger totalMaleBees = new AtomicInteger(0);
     private AtomicInteger totalWorkerBees = new AtomicInteger(0);
+    private AtomicInteger BacteriaEatenFood = new AtomicInteger(0);
+    private AtomicInteger BeeEatenFood = new AtomicInteger(0);
+    private AtomicInteger totalFoodInHive = new AtomicInteger(0);
+    private AtomicInteger totalDronesInMatingQueue = new AtomicInteger(0);
 
+    public void printCounters() {
+        System.out.println("Total Living Things: " + totalLivingThings.get());
+        System.out.println("Total Bees: " + totalBees.get());
+        System.out.println("Total Bacterias: " + totalBacterias.get());
+        System.out.println("Total Queen Bees: " + totalQueenBees.get());
+        System.out.println("Total Male Bees: " + totalMaleBees.get());
+        System.out.println("Total Worker Bees: " + totalWorkerBees.get());
+        System.out.println("Bacteria Eaten Food: " + BacteriaEatenFood.get());
+        System.out.println("Bee Eaten Food: " + BeeEatenFood.get());
+        System.out.println("Total Food in Hive: " + totalFoodInHive.get());
+        System.out.println("Total Drones in Mating Queue: " + totalDronesInMatingQueue.get());
+    }
     public EventReader(ConnectionFactory factory, String exchangeName) {
         this.factory = factory;
         this.exchangeName = exchangeName;
@@ -38,112 +51,95 @@ public class EventReader {
             String queueName = channel.queueDeclare().getQueue();
             channel.queueBind(queueName, exchangeName, routingKey);
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                //String message = new String(delivery.getBody(), "UTF-8");
-                //System.out.println("message" + message);
-                System.out.println("i got a message");
-                //JsonObject eventObject = gson.fromJson(message, JsonObject.class);
-                //System.out.println(eventObject);
-                //processEvent(eventObject, routingKey);
+                String message = new String(delivery.getBody(), "UTF-8");
+                LivingThingDTO dto = gson.fromJson(message, LivingThingDTO.class);
+                processEvent(dto, routingKey);
             };
-
             channel.basicConsume(queueName, true, deliverCallback, consumerTag -> {});
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
         }
     }
-
-    private void processEvent(JsonObject eventObject, String routingKey) {
-        System.out.println("Routing Key: " + routingKey);
-        System.out.println("Event Object: " + eventObject);
-
-        String type = eventObject.get("type").getAsString();
+    private void processEvent(LivingThingDTO dto, String routingKey) {
         switch (routingKey) {
             case "birth":
-                System.out.println("it fucking entered");
-                handleBirthEvent(type, eventObject);
+                incrementCounters(dto);
                 break;
             case "death":
-                handleDeathEvent(type, eventObject);
+                decrementCounters(dto);
                 break;
-            case "foodAteFromHive":
-                handleFoodAteFromHiveEvent();
+            case "food":
+                processFoodEvent(dto);
                 break;
-            case "foodCollectedSuccessfully":
-                handleFoodCollectedSuccessfullyEvent();
-                break;
-            case "DroneInMatingQueue":
-                handleDroneInMatingQueueEvent();
-                break;
-            default:
-                System.out.println("Unhandled routing key: " + routingKey);
+            case "matingqueue":
+                processMatingQueueEvent(dto);
                 break;
         }
     }
-
-    private void handleBirthEvent(String type, JsonObject eventObject) {
+    private void incrementCounters(LivingThingDTO dto) {
         totalLivingThings.incrementAndGet();
-        System.out.println("Total living things incremented: " + totalLivingThings);
-
-        if ("Bacteria".equals(type)) {
+        if ("Bacteria".equals(dto.getType())) {
             totalBacterias.incrementAndGet();
-            System.out.println("Total bacterias incremented: " + totalBacterias);
-        } else if ("Bee".equals(type)) {
+        } else if ("Bee".equals(dto.getType())) {
             totalBees.incrementAndGet();
-            System.out.println("Total bees incremented: " + totalBees);
-            updateBeeCounters(eventObject, 1);
+            incrementBeeTypeCounters(dto.getSubtype());
         }
     }
-
-    private void handleDeathEvent(String type, JsonObject eventObject) {
+    private void decrementCounters(LivingThingDTO dto) {
         totalLivingThings.decrementAndGet();
-        System.out.println("Total living things decremented: " + totalLivingThings);
-
-        if ("Bacteria".equals(type)) {
+        if ("Bacteria".equals(dto.getType())) {
             totalBacterias.decrementAndGet();
-            System.out.println("Total bacterias decremented: " + totalBacterias);
-        } else if ("Bee".equals(type)) {
+        } else if ("Bee".equals(dto.getType())) {
             totalBees.decrementAndGet();
-            System.out.println("Total bees decremented: " + totalBees);
-            updateBeeCounters(eventObject, -1);
+            decrementBeeTypeCounters(dto.getSubtype());
         }
     }
-
-    private void handleFoodAteFromHiveEvent() {
-        foodInHive.decrementAndGet();
-        System.out.println("Food in hive decremented: " + foodInHive);
+    private void processFoodEvent(LivingThingDTO dto) {
+        if ("Bacteria".equals(dto.getType())) {
+            BacteriaEatenFood.incrementAndGet();
+        } else if ("Bee".equals(dto.getType())) {
+            BeeEatenFood.incrementAndGet();
+            if (dto.getFoodEaten() != null && dto.getFoodEaten() == 10) {
+                totalFoodInHive.incrementAndGet();
+            } else {
+                totalFoodInHive.decrementAndGet();
+            }
+        }
     }
-
-    private void handleFoodCollectedSuccessfullyEvent() {
-        foodInWild.decrementAndGet();
-        System.out.println("Food in wild decremented by 10: " + foodInWild);
-        foodInHive.incrementAndGet();
-        System.out.println("Food in hive incremented: " + foodInHive);
+    private void processMatingQueueEvent(LivingThingDTO dto) {
+        if (dto.getMatingQueueStatus() != null) {
+            if (dto.getMatingQueueStatus()) {
+                totalDronesInMatingQueue.incrementAndGet();
+            } else {
+                totalDronesInMatingQueue.decrementAndGet();
+            }
+        }
     }
-
-    private void handleDroneInMatingQueueEvent() {
-        dronesInMatingQueue.incrementAndGet();
-        System.out.println("Drones in mating queue incremented: " + dronesInMatingQueue);
-    }
-
-    private void updateBeeCounters(JsonObject beeObject, int increment) {
-        String beeType = beeObject.get("beeType").getAsString();
-        System.out.println("Bee Type: " + beeType);
-
-        switch (beeType) {
-            case "QueenBee":
-                totalQueenBees.incrementAndGet();
-                System.out.println("Total queen bees " + (increment > 0 ? "incremented: " : "decremented: ") + totalQueenBees);
-                break;
-            case "MaleBee":
-                totalMaleBees.incrementAndGet();
-                System.out.println("Total male bees " + (increment > 0 ? "incremented: " : "decremented: ") + totalMaleBees);
-                break;
-            case "WorkerBee":
+    private void incrementBeeTypeCounters(String subtype) {
+        switch (subtype) {
+            case "Worker":
                 totalWorkerBees.incrementAndGet();
-                System.out.println("Total worker bees " + (increment > 0 ? "incremented: " : "decremented: ") + totalWorkerBees);
+                break;
+            case "Male":
+                totalMaleBees.incrementAndGet();
+                break;
+            case "Queen":
+                totalQueenBees.incrementAndGet();
                 break;
         }
     }
-
+    private void decrementBeeTypeCounters(String subtype) {
+        switch (subtype) {
+            case "Worker":
+                totalWorkerBees.decrementAndGet();
+                break;
+            case "Male":
+                totalMaleBees.decrementAndGet();
+                break;
+            case "Queen":
+                totalQueenBees.decrementAndGet();
+                break;
+        }
+    }
 
 }

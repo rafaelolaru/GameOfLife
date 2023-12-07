@@ -19,15 +19,27 @@ public class EventPublisher {
     public EventPublisher(ConnectionFactory factory, String exchangeName) {
         this.connectionFactory = factory;
         this.exchangeName = exchangeName;
+        init();
+    }
+    private void init() {
+        try {
+            connection = connectionFactory.newConnection();
+            channel = connection.createChannel();
+        } catch (IOException | TimeoutException e) {
+            e.printStackTrace();
+        }
     }
 
     public void publishEvent(String routingKey, LivingThing livingThing) {
-        //String message = gson.toJson(livingThing);
-        String message =
+        LivingThingDTO dto = new LivingThingDTO(livingThing);
+        String message = gson.toJson(dto);
         System.out.println(message);
-        System.out.println(livingThing);
         try {
-            channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
+            if (channel != null) {
+                channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));
+            } else {
+                System.out.println("Channel is null. Cannot publish the event.");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

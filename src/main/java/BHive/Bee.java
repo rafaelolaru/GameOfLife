@@ -8,15 +8,14 @@ abstract class Bee extends LivingThing{
     protected HiveEnvironment environment;
     protected LifeCycleListener lifecycleListener;
     protected String type;
-    protected int id;
+
+    public abstract String getBeeType();
     public Bee(int lifespan, HiveEnvironment environment, LifeCycleListener listener, String type) {
+        super(); // Call to super() is implicit, but added for clarity
         this.lifespan = lifespan;
         this.environment = environment;
         this.lifecycleListener = listener;
-        this.isAlive = true;
         this.type = type;
-        this.id = LivingThing.ID;
-        LivingThing.ID = LivingThing.ID + 1;
 
         this.lifecycleListener.onBirth(this);
     }

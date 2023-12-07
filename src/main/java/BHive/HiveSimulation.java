@@ -3,6 +3,7 @@ import com.rabbitmq.client.ConnectionFactory;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,16 +24,34 @@ public class HiveSimulation implements LifeCycleListener {
     Random random = new Random();
 
     public static void main(String[] args) {
+        HiveSimulation simulation = new HiveSimulation();
+        startInputThread(simulation.eventReader);  // Start the input thread
         try{
-            HiveSimulation simulation = new HiveSimulation();
             simulation.startSimulation();
         }catch(Exception e){
             e.printStackTrace();
         }finally{
-            //System.exit(1); //Shuts down EVERY thread if main fails. Helps PC to not go kaboom.
+            System.exit(1); //Shuts down EVERY thread if main fails. Helps PC to not go kaboom.
         }
     }
+    private static void startInputThread(EventReader eventReader) {
+        Thread inputThread = new Thread(() -> {
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                System.out.println("Press 'p' to print counters or 'q' to quit:");
+                String input = scanner.nextLine();
 
+                if ("p".equals(input)) {
+                    eventReader.printCounters();
+                } else if ("q".equals(input)) {
+                    break; // Exit the loop, but don't interrupt the thread
+                }
+            }
+            scanner.close();
+        });
+
+        inputThread.start();
+    }
     public AtomicBoolean isNewDay() {
         return newDay;
     }
@@ -81,6 +100,10 @@ public class HiveSimulation implements LifeCycleListener {
                     futureList.remove(future);
                 }
             }
+            //recommendations:
+            // don't use flags like isAlive
+
+            //
 
             // Simulate the end of a day
             try {
@@ -89,13 +112,6 @@ public class HiveSimulation implements LifeCycleListener {
                 Thread.currentThread().interrupt();
                 break;
             }
-            ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("localhost");
-            factory.setUsername("guest");
-            factory.setPassword("guest");
-            EventReader eventReader = new EventReader(factory,"rafael");
-            this.eventReader.startListening("birth");
-            this.eventReader.startListening("death");
         }
 
         // After all simulation days are over, shutdown the executor
@@ -138,7 +154,7 @@ public class HiveSimulation implements LifeCycleListener {
             environment.totalBees.decrementAndGet();
             environment.addWildFood(20);  // Add 20 units to the wild food
         }
-
+        eventPublisher.publishEvent("death", livingThing);
     }
 
     @Override
@@ -166,10 +182,10 @@ public class HiveSimulation implements LifeCycleListener {
             try {
                 future = executorService.submit(bee);
                 futureList.add(future);
-                eventPublisher.publishEvent("birth", bee);
             } catch (RejectedExecutionException e) {
                 System.out.println("Could not start the life of a new " + bee.type + " because the executor service is shutting down.");
             }
+            eventPublisher.publishEvent("birth", livingThing);
         }
     }
 
