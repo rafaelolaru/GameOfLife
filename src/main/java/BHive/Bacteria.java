@@ -26,53 +26,89 @@ public class Bacteria extends LivingThing{
         this(6,environment,listener,"Bacteria");
     }
     @Override
+//    public void liveDay() {
+//        // Check if the bacteria has reached its lifespan
+//        if (age.incrementAndGet() > lifespan) {
+//            lifecycleListener.onDeath(this);
+//        }else{
+//            // Check if the bacteria eats food
+//            if (environment.getFoodCollected() > 0) {
+//                // Reset consecutive days of starvation if food is consumed
+//                consecutiveDaysStarved = 0;
+//
+//                // Increment consecutive days of eating
+//                consecutiveDaysEaten++;
+//
+//                // Check if the bacteria has eaten for three consecutive days
+//                if (consecutiveDaysEaten >= 3) {
+//                    // Double the bacteria
+//                    new Bacteria(environment, lifecycleListener);
+//                    consecutiveDaysEaten = 0; // Reset consecutive days of eating
+//                }
+//
+//                environment.eatFood(); // Consume food
+//            } else {
+//                // Reset consecutive days of eating
+//                consecutiveDaysEaten = 0;
+//
+//                // Increment consecutive days of starvation
+//                consecutiveDaysStarved++;
+//
+//                // Check if the bacteria has starved for two consecutive days
+//                if (consecutiveDaysStarved >= 2) {
+//                    lifecycleListener.onDeath(this); // Bacteria dies due to starvation
+//                    return;
+//                }
+//            }
+//            // Increment age as a day passes
+//            age.incrementAndGet();
+//        }
+//    }
+
+    //New liveDay and functions for checking starvation
     public void liveDay() {
-        // Check if the bacteria has reached its lifespan
         if (age.incrementAndGet() > lifespan) {
+            this.isAlive = false;
             lifecycleListener.onDeath(this);
-        }else{
-            // Check if the bacteria eats food
-            if (environment.getFoodCollected() > 0) {
-                // Reset consecutive days of starvation if food is consumed
-                consecutiveDaysStarved = 0;
+            return;
+        }
+        performDailyTask();
+    }
 
-                // Increment consecutive days of eating
-                consecutiveDaysEaten++;
-
-                // Check if the bacteria has eaten for three consecutive days
-                if (consecutiveDaysEaten >= 3) {
-                    // Double the bacteria
-                    new Bacteria(environment, lifecycleListener);
-                    consecutiveDaysEaten = 0; // Reset consecutive days of eating
-                }
-
-                environment.eatFood(); // Consume food
-            } else {
-                // Reset consecutive days of eating
-                consecutiveDaysEaten = 0;
-
-                // Increment consecutive days of starvation
-                consecutiveDaysStarved++;
-
-                // Check if the bacteria has starved for two consecutive days
-                if (consecutiveDaysStarved >= 2) {
-                    lifecycleListener.onDeath(this); // Bacteria dies due to starvation
-                    return;
-                }
-            }
-            // Increment age as a day passes
-            age.incrementAndGet();
+    private void resetStarvationAndMaybeReproduce() {
+        consecutiveDaysStarved = 0;
+        consecutiveDaysEaten++;
+        if (consecutiveDaysEaten >= 3) {
+            Bacteria newBacteria = new Bacteria(environment, lifecycleListener);
+            lifecycleListener.onBirth(newBacteria); // Delegate the reproduction to the lifecycleListener
+            //onReproduction(this);
+            consecutiveDaysEaten = 0;
         }
     }
+
+    private void incrementStarvationAndCheckDeath() {
+        consecutiveDaysEaten = 0;
+        consecutiveDaysStarved++;
+        if (consecutiveDaysStarved >= 2) {
+            lifecycleListener.onDeath(this);
+        }
+    }
+    //End of new liveDay and functions for checking starvation
     public void performDailyTask() {
-        ;//reproduction happens @LiveDay for now
+        if (consecutiveDaysEaten > 0) {
+            resetStarvationAndMaybeReproduce();
+            environment.eatFood();
+        } else {
+            incrementStarvationAndCheckDeath();
+        }
+
     }
     @Override
     public void run() {
         Random random = new Random();
         while (isAlive) {
             if (((HiveSimulation)lifecycleListener).isNewDay().get()) {
-                performDailyTask();
+//                performDailyTask();
                 liveDay();
             }
 
