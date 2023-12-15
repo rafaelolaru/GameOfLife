@@ -65,15 +65,17 @@ class HiveEnvironment {
         return foodCollected.get();
     }
     public void addFood() {
-        //Upon succesful "harvesting", the bee brings home 10 units of food
+        //Upon successful "harvesting", the bee brings home 10 units of food
         foodCollected.addAndGet(10);
         wildFood.addAndGet(-10);
     }
-    public void eatFood() {
+    public boolean eatFood() {
         /* one bee can only eat a unit of food per day. */
         if (foodCollected.get() > 0) {
             foodCollected.decrementAndGet(); // Consume one unit of food
+            return true ;
         }
+        return false ;
     }
     public void resetDailyFood(){ //handles endOfDay foodCounter reset
         ;

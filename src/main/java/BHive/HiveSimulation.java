@@ -112,6 +112,15 @@ public class HiveSimulation implements LifeCycleListener {
                 Thread.currentThread().interrupt();
                 break;
             }
+
+            System.out.println("---------------------------------");
+            System.out.println("End of Day " + (day + 1) + ":");
+            System.out.println("Total number of bacterias: " + environment.getTotalNumberOfBacterias());
+            System.out.println("Total number of bees: " + environment.getTotalNumberOfBees());
+            System.out.println("Number of worker bees: " + environment.getNumberOfWorkerBees());
+            System.out.println("Number of drones: " + environment.getNumberOfDrones());
+            System.out.println("Food in the hive: " + environment.getFoodCollected());
+            System.out.println("Wild food available: " + environment.getWildFood());
         }
 
         // After all simulation days are over, shutdown the executor
@@ -192,7 +201,7 @@ public class HiveSimulation implements LifeCycleListener {
     public void tickNewDay(){ //signals the start of a new day for a few ms
         this.newDay.set(true);
         try {
-            TimeUnit.MILLISECONDS.sleep(100);
+            TimeUnit.MILLISECONDS.sleep(500);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
