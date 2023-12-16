@@ -29,6 +29,24 @@ class QueenBee extends Bee {
         }
     }
 
+    public Queue<MaleBee> getMatingQueue() {
+        return matingQueue;
+    }
+
+    @Override
+    public void liveDay() {
+        if (age.incrementAndGet() > lifespan) {
+            lifecycleListener.onDeath(this);
+        }
+        if (environment.eatFood()){
+            this.consecutiveDaysStarved = 0 ;
+        }else{
+            this.consecutiveDaysStarved ++ ;
+        }
+        if (consecutiveDaysStarved >= 15) {
+            lifecycleListener.onDeath(this);
+        }
+    }
     private void initiateMatingFlight() {
         mateWithMaleBee();
         pregnant = true ;
@@ -50,7 +68,7 @@ class QueenBee extends Bee {
         double threshold = totalBees * 0.1 * 2;//if there is not enough food, no bees will be born
         double foodPerBee = 1;//this may need to be changed to 1
         double randomVariabilityFactor = 0.8 + (1.2 - 0.8) * random.nextDouble();//some kind of randomness
-        double dailyBirthRate = baseRate * ((foodAvailable - threshold) / foodPerBee) * randomVariabilityFactor/100;
+        double dailyBirthRate = baseRate * ((foodAvailable - threshold) / foodPerBee) * randomVariabilityFactor/500;
         int newBees = Math.max(0, (int) Math.round(dailyBirthRate));
         pregnant = false;
 
@@ -80,7 +98,7 @@ class QueenBee extends Bee {
         pregnancyDays++;
 
         // Check if the pregnancy duration is over
-        if (pregnancyDays > 3) {
+        if (pregnancyDays > 2) {
             pregnant = false;
             pregnancyDays = 0;
 

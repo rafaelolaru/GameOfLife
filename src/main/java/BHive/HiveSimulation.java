@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HiveSimulation implements LifeCycleListener {
     private ExecutorService executorService = Executors.newCachedThreadPool();
     private HiveEnvironment environment = new HiveEnvironment();
-    private final int simulationDays = 30;
+    private final int simulationDays = 50;
     //private AtomicInteger totalBees = new AtomicInteger(0);
     private AtomicBoolean newDay = new AtomicBoolean(false);
     List<Future<?>> futureList = new CopyOnWriteArrayList<>();
@@ -60,8 +60,8 @@ public class HiveSimulation implements LifeCycleListener {
         factory.setHost("localhost");
         factory.setUsername("guest");
         factory.setPassword("guest");
-        this.eventPublisher = new EventPublisher(factory, "rafael");
-        this.eventReader = new EventReader(factory, "rafael");
+        this.eventPublisher = new EventPublisher(factory, "xander");//TODO: REPLACE WITH YOUR EXCHANGE NAME!
+        this.eventReader = new EventReader(factory, "xander");
         this.eventReader.startListening("birth");
         this.eventReader.startListening("death");
     }
@@ -119,6 +119,7 @@ public class HiveSimulation implements LifeCycleListener {
             System.out.println("Total number of bees: " + environment.getTotalNumberOfBees());
             System.out.println("Number of worker bees: " + environment.getNumberOfWorkerBees());
             System.out.println("Number of drones: " + environment.getNumberOfDrones());
+            System.out.println("Number of queens: " + environment.getNumberOfQueenBeesBees());
             System.out.println("Food in the hive: " + environment.getFoodCollected());
             System.out.println("Wild food available: " + environment.getWildFood());
         }
@@ -159,6 +160,8 @@ public class HiveSimulation implements LifeCycleListener {
                 environment.decrementWorkerBees();
             } else if (livingThing instanceof MaleBee) {
                 environment.decrementDrones();
+            } else if (livingThing instanceof QueenBee) {
+                environment.decrementQueenBees();
             }
             environment.totalBees.decrementAndGet();
             environment.addWildFood(20);  // Add 20 units to the wild food
@@ -186,6 +189,8 @@ public class HiveSimulation implements LifeCycleListener {
                 environment.incrementWorkerBees();
             } else if (livingThing instanceof MaleBee) {
                 environment.incrementDrones();
+            }else if (livingThing instanceof QueenBee) {
+                environment.incrementQueenBees();
             }
             environment.totalBees.incrementAndGet();
             try {

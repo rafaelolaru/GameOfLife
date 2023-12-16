@@ -8,6 +8,7 @@ abstract class Bee extends LivingThing{
     protected HiveEnvironment environment;
     protected LifeCycleListener lifecycleListener;
     protected String type;
+    protected int consecutiveDaysStarved;
 
     public abstract String getBeeType();
     public Bee(int lifespan, HiveEnvironment environment, LifeCycleListener listener, String type) {
@@ -23,7 +24,14 @@ abstract class Bee extends LivingThing{
         if (age.incrementAndGet() > lifespan) {
             lifecycleListener.onDeath(this);
         }
-        environment.eatFood();
+        if (environment.eatFood()){
+            consecutiveDaysStarved = 0 ;
+        }else{
+            consecutiveDaysStarved ++ ;
+        }
+        if (consecutiveDaysStarved >= 5) {
+            lifecycleListener.onDeath(this);
+        }
     }
     public abstract void performDailyTask();
     @Override
@@ -36,7 +44,7 @@ abstract class Bee extends LivingThing{
             }
 
             try {
-                Thread.sleep(400 + random.nextInt(201)); // this will reduce the cpu usage. Sleep interval: 0.4-0.6s
+                Thread.sleep(1000); // this will reduce the cpu usage. Sleep interval: 0.4-0.6s
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return;

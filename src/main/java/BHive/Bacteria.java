@@ -79,7 +79,7 @@ public class Bacteria extends LivingThing{
             }
 
             try {
-                Thread.sleep(400 + random.nextInt(201)); // this will reduce the cpu usage. Sleep interval: 0.4-0.6s
+                Thread.sleep(1000); // this will reduce the cpu usage.
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return;

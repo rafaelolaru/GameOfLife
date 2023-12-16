@@ -7,6 +7,7 @@ class HiveEnvironment {
     public AtomicInteger totalBacterias = new AtomicInteger(0); //total number of bacterias
     private AtomicInteger numberOfDrones = new AtomicInteger(0);
     private AtomicInteger numberOfWorkerBees = new AtomicInteger(0);
+    private AtomicInteger numberOfQueenBees = new AtomicInteger(0);
     private AtomicInteger wildFood = new AtomicInteger(0);// amount of food available for grabs in the wild
 
     public AtomicInteger getWildFood() {
@@ -19,6 +20,9 @@ class HiveEnvironment {
 
     public AtomicInteger getNumberOfWorkerBees() {
         return numberOfWorkerBees;
+    }
+    public AtomicInteger getNumberOfQueenBeesBees() {
+        return numberOfQueenBees;
     }
 
     public void addWildFood(int amount) {
@@ -41,6 +45,12 @@ class HiveEnvironment {
     }
     public void decrementWorkerBees() {
         numberOfWorkerBees.decrementAndGet();
+    }
+    public void incrementQueenBees() {
+        numberOfQueenBees.incrementAndGet();
+    }
+    public void decrementQueenBees() {
+        numberOfQueenBees.decrementAndGet();
     }
     public boolean hasSufficientWildFood() {
         return wildFood.get() > 10;
