@@ -80,7 +80,13 @@ public class EventReader {
         totalLivingThings.incrementAndGet();
         if ("Bacteria".equals(dto.getType())) {
             totalBacterias.incrementAndGet();
-        } else if ("Bee".equals(dto.getType())) {
+        } else if ("QueenBee".equals(dto.getType())) {
+            totalBees.incrementAndGet();
+            incrementBeeTypeCounters(dto.getSubtype());
+        } else if ("MaleBee".equals(dto.getType())) {
+            totalBees.incrementAndGet();
+            incrementBeeTypeCounters(dto.getSubtype());
+        } else if ("WorkerBee".equals(dto.getType())) {
             totalBees.incrementAndGet();
             incrementBeeTypeCounters(dto.getSubtype());
         }
@@ -89,7 +95,13 @@ public class EventReader {
         totalLivingThings.decrementAndGet();
         if ("Bacteria".equals(dto.getType())) {
             totalBacterias.decrementAndGet();
-        } else if ("Bee".equals(dto.getType())) {
+        } else if ("QueenBee".equals(dto.getType())) {
+            totalBees.decrementAndGet();
+            decrementBeeTypeCounters(dto.getSubtype());
+        } else if ("MaleBee".equals(dto.getType())) {
+            totalBees.decrementAndGet();
+            decrementBeeTypeCounters(dto.getSubtype());
+        } else if ("WorkerBee".equals(dto.getType())) {
             totalBees.decrementAndGet();
             decrementBeeTypeCounters(dto.getSubtype());
         }

@@ -61,9 +61,9 @@ public class HiveSimulation implements LifeCycleListener {
         factory.setUsername("guest");
         factory.setPassword("guest");
         this.eventPublisher = new EventPublisher(factory, "xander");//TODO: REPLACE WITH YOUR EXCHANGE NAME!
-        this.eventReader = new EventReader(factory, "xander");
-        this.eventReader.startListening("birth");
-        this.eventReader.startListening("death");
+//        this.eventReader = new EventReader(factory, "xander");
+//        this.eventReader.startListening("birth");
+//        this.eventReader.startListening("death");
     }
 
     private void startSimulation() {
@@ -199,8 +199,8 @@ public class HiveSimulation implements LifeCycleListener {
             } catch (RejectedExecutionException e) {
                 System.out.println("Could not start the life of a new " + bee.type + " because the executor service is shutting down.");
             }
-            eventPublisher.publishEvent("birth", livingThing);
         }
+        eventPublisher.publishEvent("birth", livingThing);
     }
 
     public void tickNewDay(){ //signals the start of a new day for a few ms
