@@ -14,7 +14,6 @@ public class EventPublisher {
     private final ConnectionFactory connectionFactory;
     private final String exchangeName;
     private Channel channel;
-    private Connection connection;
 
     public EventPublisher(ConnectionFactory factory, String exchangeName) {
         this.connectionFactory = factory;
@@ -23,7 +22,7 @@ public class EventPublisher {
     }
     private void init() {
         try {
-            connection = connectionFactory.newConnection();
+            Connection connection = connectionFactory.newConnection();
             channel = connection.createChannel();
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
@@ -33,7 +32,27 @@ public class EventPublisher {
     public void publishEvent(String routingKey, LivingThing livingThing) {
         LivingThingDTO dto = new LivingThingDTO(livingThing);
         String message = gson.toJson(dto);
-        System.out.println(message);
+        switch (routingKey) {
+            case "mating-start":
+                routingKey = "mating";
+                dto.setDone(false);
+                break;
+            case "mating-done":
+                routingKey = "mating";
+                dto.setDone(true);
+                break;
+            case "food-ate":
+                routingKey = "food";
+                dto.setFoodEaten(true);
+                break;
+            case "food-harvest":
+            case "food-death":
+                routingKey = "food";
+                dto.setFoodEaten(false);
+                break;
+            default:
+                break;
+        }
         try {
             if (channel != null) {
                 channel.basicPublish(exchangeName, routingKey, null, message.getBytes("UTF-8"));

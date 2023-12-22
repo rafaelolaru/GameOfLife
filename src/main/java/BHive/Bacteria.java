@@ -1,4 +1,6 @@
 package BHive;
+import com.rabbitmq.client.ConnectionFactory;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Random;
 
@@ -10,6 +12,7 @@ public class Bacteria extends LivingThing{
     protected String type;
     private int consecutiveDaysEaten;
     private int consecutiveDaysStarved;
+    EventPublisher eventPublisher;
 
     public Bacteria(int lifespan, HiveEnvironment environment, LifeCycleListener listener, String type) {
         super(); // Call to super() is implicit, but added for clarity
@@ -17,6 +20,12 @@ public class Bacteria extends LivingThing{
         this.environment = environment;
         this.lifecycleListener = listener;
         this.type = type;
+
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        factory.setUsername("guest");
+        factory.setPassword("guest");
+        this.eventPublisher = new EventPublisher(factory, "rafael");
 
         this.lifecycleListener.onBirth(this);
         this.consecutiveDaysEaten = 0;
@@ -36,6 +45,7 @@ public class Bacteria extends LivingThing{
         if (environment.eatFood()){
             consecutiveDaysStarved = 0 ;
             consecutiveDaysEaten ++ ;
+            eventPublisher.publishEvent("food-ate", this);
         }else{
             consecutiveDaysEaten = 0;
             consecutiveDaysStarved ++ ;
@@ -46,7 +56,7 @@ public class Bacteria extends LivingThing{
 
     private void resetStarvationAndMaybeReproduce() {
         consecutiveDaysStarved = 0;
-        if (consecutiveDaysEaten >= 3) {
+        if (consecutiveDaysEaten >= 4) {
             Bacteria newBacteria = new Bacteria(environment, lifecycleListener);
             lifecycleListener.onBirth(newBacteria); // Delegate the reproduction to the lifecycleListener
             //onReproduction(this);
@@ -71,7 +81,6 @@ public class Bacteria extends LivingThing{
     }
     @Override
     public void run() {
-        Random random = new Random();
         while (isAlive) {
             if (((HiveSimulation)lifecycleListener).isNewDay().get()) {
 //                performDailyTask();

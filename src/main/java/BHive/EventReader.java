@@ -1,19 +1,19 @@
 package BHive;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 public class EventReader {
 
     private final ConnectionFactory factory;
     private final String exchangeName;
     private final Gson gson = new Gson();
-
     private AtomicInteger totalLivingThings = new AtomicInteger(0);
     private AtomicInteger totalBees = new AtomicInteger(0);
     private AtomicInteger totalBacterias = new AtomicInteger(0);
@@ -25,6 +25,18 @@ public class EventReader {
     private AtomicInteger totalFoodInHive = new AtomicInteger(0);
     private AtomicInteger totalDronesInMatingQueue = new AtomicInteger(0);
 
+    public void resetCounters() {
+        totalLivingThings = new AtomicInteger(0);
+        totalBees = new AtomicInteger(0);
+        totalBacterias = new AtomicInteger(0);
+        totalQueenBees = new AtomicInteger(0);
+        totalMaleBees = new AtomicInteger(0);
+        totalWorkerBees = new AtomicInteger(0);
+        BacteriaEatenFood = new AtomicInteger(0);
+        BeeEatenFood = new AtomicInteger(0);
+        totalFoodInHive = new AtomicInteger(0);
+        totalDronesInMatingQueue = new AtomicInteger(0);
+    }
     public void printCounters() {
         System.out.println("Total Living Things: " + totalLivingThings.get());
         System.out.println("Total Bees: " + totalBees.get());
@@ -32,17 +44,16 @@ public class EventReader {
         System.out.println("Total Queen Bees: " + totalQueenBees.get());
         System.out.println("Total Male Bees: " + totalMaleBees.get());
         System.out.println("Total Worker Bees: " + totalWorkerBees.get());
-        System.out.println("Bacteria Eaten Food: " + BacteriaEatenFood.get());
-        System.out.println("Bee Eaten Food: " + BeeEatenFood.get());
         System.out.println("Total Food in Hive: " + totalFoodInHive.get());
+        System.out.println("BacteriaEatenFood: " + BacteriaEatenFood.get());
+        System.out.println("BeeEatenFood: " + BeeEatenFood.get());
         System.out.println("Total Drones in Mating Queue: " + totalDronesInMatingQueue.get());
     }
     public EventReader(ConnectionFactory factory, String exchangeName) {
         this.factory = factory;
         this.exchangeName = exchangeName;
     }
-
-    public void startListening(String routingKey) {
+        public void startListening(String routingKey) {
         try {
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
@@ -71,7 +82,7 @@ public class EventReader {
             case "food":
                 processFoodEvent(dto);
                 break;
-            case "matingqueue":
+            case "mating":
                 processMatingQueueEvent(dto);
                 break;
         }
@@ -111,20 +122,21 @@ public class EventReader {
             BacteriaEatenFood.incrementAndGet();
         } else if ("Bee".equals(dto.getType())) {
             BeeEatenFood.incrementAndGet();
-            if (dto.getFoodEaten() != null && dto.getFoodEaten() == 10) {
-                totalFoodInHive.incrementAndGet();
-            } else {
+            if (dto.getFoodEaten()) {
                 totalFoodInHive.decrementAndGet();
+            } else {
+                totalFoodInHive.addAndGet(10);
             }
         }
     }
     private void processMatingQueueEvent(LivingThingDTO dto) {
-        if (dto.getMatingQueueStatus() != null) {
-            if (dto.getMatingQueueStatus()) {
-                totalDronesInMatingQueue.incrementAndGet();
-            } else {
-                totalDronesInMatingQueue.decrementAndGet();
-            }
+        if (dto.getDone()){
+            totalDronesInMatingQueue.decrementAndGet();
+            System.out.println("decrementing matingqueue");
+        }
+        else{
+            totalDronesInMatingQueue.incrementAndGet();
+            System.out.println("incrementing matingqueue");
         }
     }
     private void incrementBeeTypeCounters(String subtype) {
@@ -146,7 +158,10 @@ public class EventReader {
                 totalWorkerBees.decrementAndGet();
                 break;
             case "Male":
-                totalMaleBees.decrementAndGet();
+                if (totalMaleBees.get() > 1) {
+                    totalMaleBees.decrementAndGet();
+                    System.out.println("Male Bee died");
+                }
                 break;
             case "Queen":
                 totalQueenBees.decrementAndGet();

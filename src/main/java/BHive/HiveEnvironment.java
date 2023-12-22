@@ -4,53 +4,9 @@ class HiveEnvironment {
     private AtomicInteger foodCollected = new AtomicInteger(0);// amount of food in the hive
     private AtomicInteger currentDay = new AtomicInteger(0);// does this really need an explanation?
     public AtomicInteger totalBees = new AtomicInteger(0); //total number of bees
-    public AtomicInteger totalBacterias = new AtomicInteger(0); //total number of bacterias
-    private AtomicInteger numberOfDrones = new AtomicInteger(0);
-    private AtomicInteger numberOfWorkerBees = new AtomicInteger(0);
-    private AtomicInteger numberOfQueenBees = new AtomicInteger(0);
     private AtomicInteger wildFood = new AtomicInteger(0);// amount of food available for grabs in the wild
-
-    public AtomicInteger getWildFood() {
-        return wildFood;
-    }
-
-    public AtomicInteger getNumberOfDrones() {
-        return numberOfDrones;
-    }
-
-    public AtomicInteger getNumberOfWorkerBees() {
-        return numberOfWorkerBees;
-    }
-    public AtomicInteger getNumberOfQueenBeesBees() {
-        return numberOfQueenBees;
-    }
-
     public void addWildFood(int amount) {
         wildFood.addAndGet(amount);
-    }
-    public void incrementBacterias() {
-        totalBacterias.incrementAndGet();
-    }
-    public void decrementBacterias() {
-        totalBacterias.decrementAndGet();
-    }
-    public void incrementDrones() {
-        numberOfDrones.incrementAndGet();
-    }
-    public void decrementDrones() {
-        numberOfDrones.decrementAndGet();
-    }
-    public void incrementWorkerBees() {
-        numberOfWorkerBees.incrementAndGet();
-    }
-    public void decrementWorkerBees() {
-        numberOfWorkerBees.decrementAndGet();
-    }
-    public void incrementQueenBees() {
-        numberOfQueenBees.incrementAndGet();
-    }
-    public void decrementQueenBees() {
-        numberOfQueenBees.decrementAndGet();
     }
     public boolean hasSufficientWildFood() {
         return wildFood.get() > 10;
@@ -58,18 +14,12 @@ class HiveEnvironment {
     public void setWildFood(int amount) {
         wildFood.set(amount);
     }
-    public int getCurrentDay() {
-        return currentDay.get();
-    }
     public void nextDay(HiveSimulation listener) {
         listener.tickNewDay();
         currentDay.incrementAndGet();
     }
     public int getTotalNumberOfBees() {
         return totalBees.get();
-    }
-    public int getTotalNumberOfBacterias() {
-        return totalBacterias.get();
     }
     public int getFoodCollected() {
         return foodCollected.get();
@@ -86,8 +36,5 @@ class HiveEnvironment {
             return true ;
         }
         return false ;
-    }
-    public void resetDailyFood(){ //handles endOfDay foodCounter reset
-        ;
     }
 }

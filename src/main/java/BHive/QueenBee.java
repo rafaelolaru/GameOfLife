@@ -1,4 +1,5 @@
 package BHive;
+
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Queue;
@@ -10,8 +11,7 @@ class QueenBee extends Bee {
 
     private Random random = new Random();
 
-    private double probabilityBirth ;
-
+    private double probabilityBirth;
 
     @Override
     public String getBeeType() {
@@ -22,15 +22,11 @@ class QueenBee extends Bee {
         this.pregnant = false;
         this.pregnancyDays = 0;
         this.matingQueue = new LinkedList<>();
-        for(int i = 0 ; i <3 ; i++){
+        for(int i = 0 ; i < 10; i++){
             MaleBee drone = new MaleBee(environment, lifecycleListener);
+            eventPublisher.publishEvent("mating",drone);
             matingQueue.add(drone);
-            lifecycleListener.onBirth(drone);
         }
-    }
-
-    public Queue<MaleBee> getMatingQueue() {
-        return matingQueue;
     }
 
     @Override
@@ -58,13 +54,14 @@ class QueenBee extends Bee {
         if (!matingQueue.isEmpty()) {
             MaleBee maleBee = matingQueue.poll(); // Get the next male bee from the front of the queue
             lifecycleListener.onDeath(maleBee);
+            eventPublisher.publishEvent("mating-done", maleBee);
         }
     }
 
     private void onPregnancyComplete() {
         int totalBees = environment.getTotalNumberOfBees();
         int foodAvailable = environment.getFoodCollected();
-        double baseRate = totalBees * 0.1;//the hive can get roughly 10% bigger each day.
+        double baseRate = totalBees * 0.04;//the hive can get roughly 10% bigger each day.
         double threshold = totalBees * 0.1 * 2;//if there is not enough food, no bees will be born
         double foodPerBee = 1;//this may need to be changed to 1
         double randomVariabilityFactor = 0.8 + (1.2 - 0.8) * random.nextDouble();//some kind of randomness
@@ -74,20 +71,16 @@ class QueenBee extends Bee {
 
 
         for (int i = 0; i < newBees; i++) {
-            Bee newBee;
             probabilityBirth = Math.random() ;
-            if (probabilityBirth < 0.65) {
-                newBee = new WorkerBee(environment, lifecycleListener);
-                lifecycleListener.onBirth(newBee);
+            if (probabilityBirth < 0.70) {
+                new WorkerBee(environment, lifecycleListener);
             } else {
                 if (probabilityBirth<0.90){
                     MaleBee drone = new MaleBee(environment, lifecycleListener);
                     matingQueue.add(drone);
-                    lifecycleListener.onBirth(drone);
+                    eventPublisher.publishEvent("mating-start", drone);
                 }else{
-                    System.out.println("NEW QUEEN IS BORN");
-                    newBee = new QueenBee(environment, lifecycleListener) ;
-                    lifecycleListener.onBirth(newBee);
+                    new QueenBee(environment, lifecycleListener) ;
                 }
             }
 

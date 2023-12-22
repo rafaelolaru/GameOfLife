@@ -4,8 +4,8 @@ public class LivingThingDTO {
     private String type; // "Bee" or "Bacteria"
     private String subtype; // "Worker", "Male", "Queen" for bees; null for bacteria
     private int id;
-    private Boolean matingQueueStatus; // For the 'matingqueue' event
-    private Integer foodEaten; // For the 'food' event
+    private boolean foodEaten; // For the 'food' event
+    private boolean isDone;
 
     public LivingThingDTO(LivingThing livingThing) {
         this.type = livingThing.getClass().getSimpleName();
@@ -17,7 +17,19 @@ public class LivingThingDTO {
         }
     }
 
-    public Integer getFoodEaten() {
+    public void setDone(boolean done) {
+        isDone = done;
+    }
+
+    public boolean getDone() {
+        return isDone;
+    }
+
+    public void setFoodEaten(boolean foodEaten) {
+        this.foodEaten = foodEaten;
+    }
+
+    public boolean getFoodEaten() {
         return foodEaten;
     }
 
@@ -29,7 +41,4 @@ public class LivingThingDTO {
         return subtype;
     }
 
-    public Boolean getMatingQueueStatus() {
-        return matingQueueStatus;
-    }
 }
